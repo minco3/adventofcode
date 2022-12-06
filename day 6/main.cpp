@@ -13,14 +13,12 @@
 using namespace std;
 
 int main() {
+    
     fstream file("input.txt");
     // fstream file("test.txt");
-    deque<int> q;
-    vector<deque<char>> v;
+
     unordered_map<char, int> map;
-    deque<char> dq;
-    string str, ans, s1, s2, s3, s4, s5, s6;
-    int var1 = 0, var2 = 0;
+    string str;
 
     getline(file, str);
     for (int i=0; i<13; i++)  {
@@ -41,7 +39,4 @@ int main() {
             map.at(str[i-13])--;
         }
     }
-
-
-    // std::cout << var1 << '\n' << var2 << '\n' << ans;
 }
