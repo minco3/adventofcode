@@ -12,14 +12,14 @@ using namespace std;
 
 int main() {
 
-    fstream file("testA.txt");
+    fstream file("input.txt");
     string str, str2;
     stringstream ss;
-    unordered_map<string, unsigned long> map, map2;
-    unordered_map<char, unsigned long> map3;
+    unordered_map<string, unsigned long long> map, map2;
+    unordered_map<char, unsigned long long> map3;
     unordered_map<string, char> rules;
 
-    static const int steps = 10;
+    static const int steps = 40;
 
     unsigned long long size = 0;
 
@@ -41,22 +41,26 @@ int main() {
 
     for (int i=0; i<steps; i++) {
         map = map2;
-        for (pair<string, char> p : rules) {
-            auto it = map.find(p.first);
-            if (it != map.end() && it->second != 0) { // rule exists
-                auto it2 = map2.find(p.first);
-                map2.insert({"" + p.first[0] + p.second, it->second}); // insert lhs + result
-                map2.insert({"" + p.second + p.first[1], it->second}); // insert result + rhs
-                it2->second = 0; // clear lhs+rhs
-                map3.insert({p.second, 0});
-                map3.at(p.second) += it->second;
-            }
+        for (const pair<string, unsigned long long> &p : map) {
+            if (p.second == 0) continue;
+            auto it = rules.find(p.first);
+            if (it == rules.end()) continue; // rule doesnt exist
+
+            
+            map2.at(it->first) -= p.second; // clear lhs+rhs
+            auto res = map2.insert({string() + it->first[0] + it->second, 0}); // insert lhs + result
+            res.first->second += p.second;
+            res = map2.insert({string() + it->second + it->first[1], 0}); // insert result + rhs
+            res.first->second += p.second;
+            auto res2 = map3.insert({it->second, 0});
+            res2.first->second += p.second;
+
         }
         std::cout << "step " << i << '\n';
     }
 
     char maxchar, minchar;
-    unsigned long maxint = 0, minint = -1;
+    unsigned long long maxint = 0, minint = -1;
 
     for (auto pair : map3) {
         if (pair.second > maxint) {
