@@ -1,111 +1,115 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
-#include <list>
 #include <stack>
-#include <queue>
-#include <unordered_map>
-#include <unordered_set>
+#include <map>
 #include <sstream>
 #include <string>
-#include <algorithm>
+#include <iomanip>
 
 using namespace std;
 
 struct node {
-    int weight;
-    unordered_map<string, node*> subdirs;
-    node() : weight(0), subdirs() {}
+    int size;
+    map<string, node*> subdirs;
+    map<string, int> files;
+    node() : size(0), subdirs(), files() {}
 };
 
 int recursiveadd(node* n) {
-    int sum = 0;
-    if (n->weight < 100000) {
-        sum = n->weight;
-    }
-    for (auto p : n->subdirs) {
+    int sum = n->size < 100000 ? n->size : 0;
+
+    for (const auto& p : n->subdirs) {
         sum += recursiveadd(p.second);
     }
     return sum;
 }
 
-void findvalid(vector<int>& v, node* n, int neededspace) {
-    if (n->weight >= neededspace) {
-        v.push_back(n->weight);
-        for (auto p : n->subdirs) {
-            findvalid(v, p.second, neededspace);
+int findvalid(int smallestdir, node* n, int neededspace) {
+    if (n->size >= neededspace) {
+        for (const auto& p : n->subdirs) {
+            findvalid(smallestdir, p.second, neededspace);
+        }
+        if (n->size < smallestdir) {
+            return n->size;
         }
     }
+    return smallestdir;
+}
+
+void cleanup(node* n) {
+    for (const auto& p : n->subdirs) {
+        cleanup(p.second);
+    }
+    delete n;
+}
+
+void print(node* n, int level = 0) {
+    if (level == 0) {
+        std::cout << "- / (dir)\n";
+    }
+    auto files = n->files.begin();
+    auto subdirs = n->subdirs.begin();
+
+    while (files != n->files.end() || subdirs!=n->subdirs.end()) {
+        if ((files!=n->files.end() && subdirs!=n->subdirs.end() && files->first < subdirs->first) || subdirs==n->subdirs.end() && files != n->files.end()) {
+            cout << setw((level+2)*2) << "- " << files->first << " (file, size=" << files->second << ")\n";
+            files++;
+        } else if (subdirs!=n->subdirs.end()) {
+            cout << setw((level+2)*2) << "- " << subdirs->first << " (dir)\n";
+            print(subdirs->second, level+1);
+            subdirs++;
+        }
+    }
+
 }
 
 int main() {
-    // fstream file("test.txt");
-    fstream file("input.txt");
-    deque<int> q;
-    deque<char> dq;
-    unordered_map<int, int> map;
-    node rootdir;
-    vector<int> sizes;
-    stack<node*> s;
-    stack<int> is;
-    string str, str2, ans;
-    vector<int> v;
-    int sum = 0, var2 = 0, level = 0, smallestdir, usedspace = 0;
+    fstream file("test.txt");
+    string str;
+    int sum = 0;
 
+    node rootdir;
     node* currentdir = &rootdir; 
+    stack<node*> s;
+    stack<int> weights;
     
     getline(file, str); //cd /
-    getline(file, str); //ls
 
-    while (file.peek() != '$') { // root dir
+    while (!file.eof()) { // parse
         getline(file, str);
-        if (str[0] != '$' && str[0] == 'd') { // dir
-            rootdir.subdirs.insert({str.substr(4), new node()});
-        } else if (str[0] != 'd') {
+        if (isdigit(str[0])) { // file
+            int size;
+            string filename;
             stringstream ss(str);
-            ss >> str2;
-            usedspace += stoi(str2);
-        }
-    }
-
-    while (!file.eof()) {
-        getline(file, str);
-        if (str[0] == '$' && str[2] == 'c' && str[5] != '.')  { // level in
-            level++;
+            ss >> size >> filename;
+            currentdir->size += size;
+            currentdir->files.insert({filename, size});
+        } else if (str.substr(0, 4) == "$ cd" && str[5] != '.')  { // cd in
             s.push(currentdir);
             currentdir = currentdir->subdirs.at(str.substr(5));
-        } else if (str[0] == '$' && str[2] == 'c' && str[5] == '.') { // level out
-            level--;
-            is.push(currentdir->weight);
-            currentdir = s.top();
+        } else if (str.substr(0, 4) == "$ cd" && str[5] == '.') { // cd out
+            weights.push(currentdir->size); 
+            currentdir = s.top(); // this is not assembly
             s.pop();
-            currentdir->weight+= is.top();
-            is.pop();
-        } else if (str[0] == '$' && str[2] == 'l') { // ls
-            //ignore
-        } else if (isdigit(str[0])) { // file
-            stringstream ss(str);
-            ss >> str2;
-            currentdir->weight+=stoi(str2);
-            usedspace += stoi(str2);
-        } else { // dir
+            currentdir->size += weights.top();
+            weights.pop();
+        } else if (str.substr(0, 3) == "dir") { // dir
             currentdir->subdirs.insert({str.substr(4), new node()});
         }
     }
 
-    int neededspace = usedspace - 40000000;
+    rootdir.size += currentdir->size;
 
-    for (auto p : rootdir.subdirs) {
-        for (auto p2 : p.second->subdirs) {
-            sum += recursiveadd(p2.second);
-        }
-        if (p.second->weight < 100000) {
-            sum += p.second->weight;
-        }
-        findvalid(v, p.second, neededspace);
+    int smallestdir = rootdir.size, neededspace = rootdir.size - 40000000;
+
+    print(&rootdir); // why not
+
+    for (const auto& p : rootdir.subdirs) { // solve
+        sum += recursiveadd(p.second);
+        smallestdir = findvalid(smallestdir, p.second, neededspace);
+        cleanup(p.second);
     }
-
-    smallestdir = *min_element(v.begin(), v.end());
 
     std::cout << sum << " " << smallestdir;
 }
