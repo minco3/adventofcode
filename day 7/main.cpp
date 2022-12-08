@@ -11,9 +11,10 @@ using namespace std;
 
 struct node {
     int size;
+    node* parentdir;
     map<string, node*> subdirs;
     map<string, int> files;
-    node() : size(0), subdirs(), files() {}
+    node(node* _parentnode = nullptr) : size(0), subdirs(), files(), parentdir(_parentnode) {}
 };
 
 int recursiveadd(node* n) {
@@ -22,13 +23,14 @@ int recursiveadd(node* n) {
     for (const auto& p : n->subdirs) {
         sum += recursiveadd(p.second);
     }
+
     return sum;
 }
 
 int findvalid(int smallestdir, node* n, int neededspace) {
     if (n->size >= neededspace) {
         for (const auto& p : n->subdirs) {
-            findvalid(smallestdir, p.second, neededspace);
+            smallestdir = findvalid(smallestdir, p.second, neededspace);
         }
         if (n->size < smallestdir) {
             return n->size;
@@ -37,11 +39,20 @@ int findvalid(int smallestdir, node* n, int neededspace) {
     return smallestdir;
 }
 
-void cleanup(node* n) {
-    for (const auto& p : n->subdirs) {
-        cleanup(p.second);
+void addtoparent(node* n, int val) {
+    if (n->parentdir) {
+        addtoparent(n->parentdir, val);
     }
-    delete n;
+    n->size += val;
+}
+
+void cleanup(node* n, bool root = true) {
+    for (const auto& p : n->subdirs) {
+        cleanup(p.second, false);
+    }
+    if (!root) {
+        delete n;
+    }
 }
 
 void print(node* n, int level = 0) {
@@ -61,7 +72,6 @@ void print(node* n, int level = 0) {
             subdirs++;
         }
     }
-
 }
 
 int main() {
@@ -71,8 +81,6 @@ int main() {
 
     node rootdir;
     node* currentdir = &rootdir; 
-    stack<node*> s;
-    stack<int> weights;
     
     getline(file, str); //cd /
 
@@ -83,33 +91,26 @@ int main() {
             string filename;
             stringstream ss(str);
             ss >> size >> filename;
-            currentdir->size += size;
+            addtoparent(currentdir, size);
             currentdir->files.insert({filename, size});
         } else if (str.substr(0, 4) == "$ cd" && str[5] != '.')  { // cd in
-            s.push(currentdir);
             currentdir = currentdir->subdirs.at(str.substr(5));
         } else if (str.substr(0, 4) == "$ cd" && str[5] == '.') { // cd out
-            weights.push(currentdir->size); 
-            currentdir = s.top(); // this is not assembly
-            s.pop();
-            currentdir->size += weights.top();
-            weights.pop();
+            currentdir = currentdir->parentdir;
         } else if (str.substr(0, 3) == "dir") { // dir
-            currentdir->subdirs.insert({str.substr(4), new node()});
+            currentdir->subdirs.insert({str.substr(4), new node(currentdir)});
         }
     }
 
-    rootdir.size += currentdir->size;
+    //95437 24933642
 
     int smallestdir = rootdir.size, neededspace = rootdir.size - 40000000;
 
     print(&rootdir); // why not
 
-    for (const auto& p : rootdir.subdirs) { // solve
-        sum += recursiveadd(p.second);
-        smallestdir = findvalid(smallestdir, p.second, neededspace);
-        cleanup(p.second);
-    }
+    sum = recursiveadd(&rootdir);
+    smallestdir = findvalid(smallestdir, &rootdir, neededspace);
+    cleanup(&rootdir);
 
     std::cout << sum << " " << smallestdir;
 }
