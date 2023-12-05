@@ -15,9 +15,9 @@ int main()
 {
     std::vector<std::string> grid;
     std::vector<std::vector<char>> visited;
-    std::fstream file(SOURCE_ROOT"/input.txt");
+    std::fstream file(SOURCE_DIR"/input.txt");
     std::string str;
-    uint64_t sum = 0;
+    size_t sum = 0;
     while (std::getline(file, str))
     {
         grid.push_back(str);

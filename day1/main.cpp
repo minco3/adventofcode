@@ -40,9 +40,9 @@ void find_last(
 
 int main()
 {
-    std::fstream file(SOURCE_ROOT"/input.txt");
+    std::fstream file(SOURCE_DIR"/input.txt");
     std::string str;
-    uint64_t sum = 0;
+    size_t sum = 0;
     while (!file.eof())
     {
         std::getline(file, str);

@@ -13,7 +13,7 @@
 
 int main()
 {
-    std::fstream file(SOURCE_ROOT"/input.txt");
+    std::fstream file(SOURCE_DIR"/input.txt");
     std::string str;
     size_t sum = 0;
     bool winning = true;
