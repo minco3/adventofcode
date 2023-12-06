@@ -39,7 +39,7 @@ int main()
         {
             maps.push_back(m);
             m.clear();
-            std::getline(file, str);
+            file.ignore(std::numeric_limits<std::streamsize>::max());
             continue;
         }
         std::stringstream sstream(str);
