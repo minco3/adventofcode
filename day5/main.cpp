@@ -19,7 +19,7 @@ int main()
 
     std::vector<std::pair<size_t, size_t>> seeds;
     std::vector<std::vector<mapping_t>> maps;
-    std::fstream file("../input.txt");
+    std::fstream file(SOURCE_DIR"/input.txt");
     std::string str;
 
     // get seeds
