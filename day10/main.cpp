@@ -69,7 +69,7 @@ point next(point cur, char c, point prev)
 
 int main()
 {
-    std::fstream file(SOURCE_DIR "/test3.txt");
+    std::fstream file(SOURCE_DIR "/input.txt");
     std::string str;
 
     std::vector<std::string> map;
@@ -78,11 +78,12 @@ int main()
     int64_t y = 0;
     while (std::getline(file, str))
     {
-        map.push_back(str);
         if (int64_t x = str.find('S'); x != std::string::npos)
         {
             starting_pos = {x, y};
+            str[x] = 'L'; // manual replace
         }
+        map.push_back(str);
         y++;
     }
 
@@ -105,6 +106,7 @@ int main()
     }
 
     size_t length = 1;
+    size_t area = 0;
 
     point prev = starting_pos;
     while (p != starting_pos)
@@ -118,40 +120,51 @@ int main()
 
     for (int64_t y = 0; y < visited.size(); y++)
     {
+        bool odd = false;
         for (int64_t x = 0; x < visited.at(y).size(); x++)
         {
+            // even odd rule
             if (visited[y][x])
-                continue;
-
-            for (auto d : {up, left, down, right})
             {
-                point dp = {x+d.x,y+d.y};
-                if (dp.y < 0 || dp.y >= visited.size() || dp.x < 0 || dp.x >= visited.at(y).size())
+                if (map[y][x] == 'F')
                 {
-                    visited[y][x] = 2;
-                    break;
+                    while (map[y][x] != '7' && map[y][x] != 'J')
+                    {
+                        x++;
+                    }
+                    if (map[y][x] == '7')
+                    {
+                        continue;
+                    }
                 }
-
-                if (visited[dp.y][dp.x] != 0 && visited[dp.y][dp.x] != 1)
+                else if (map[y][x] == 'L')
                 {
-                    visited[y][x] = visited[dp.y][dp.x];
-                    break;
+                    while (map[y][x] != '7' && map[y][x] != 'J')
+                    {
+                        x++;
+                    }
+                    if (map[y][x] == 'J')
+                    {
+                        continue;
+                    }
                 }
+                odd = !odd;
             }
-            if (visited[y][x])
-                continue;
-
-            
+            else if (odd)
+            {
+                area++;
+                visited[y][x] = 2;
+            }
         }
     }
-    for (auto l : visited)
-    {
-        for (auto c : l)
-        {
-            std::cout << static_cast<uint16_t>(c);
-        }
-        std::cout << std::endl;
-    }
+    // for (auto l : visited)
+    // {
+    //     for (auto c : l)
+    //     {
+    //         std::cout << static_cast<uint16_t>(c);
+    //     }
+    //     std::cout << std::endl;
+    // }
 
-    std::cout << length / 2 << std::endl;
+    std::cout << length / 2 << ' ' << area << std::endl;
 }
