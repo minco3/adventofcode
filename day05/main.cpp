@@ -2,10 +2,10 @@
 #include <fstream>
 #include <iostream>
 #include <limits>
+#include <ranges>
 #include <sstream>
 #include <string>
 #include <vector>
-#include <ranges>
 
 struct mapping_t
 {
@@ -15,9 +15,9 @@ struct mapping_t
 int main()
 {
 
-    std::vector<std::pair<size_t, size_t>> seeds;
+    std::vector<std::pair<size_t, size_t>> ranges;
     std::vector<std::vector<mapping_t>> maps;
-    std::fstream file(SOURCE_DIR"/input.txt");
+    std::fstream file(SOURCE_DIR "/input.txt");
     std::string str;
 
     // get seeds
@@ -28,7 +28,7 @@ int main()
     while (!sstr.eof())
     {
         sstr >> sstart >> length;
-        seeds.push_back({sstart, length});
+        ranges.emplace_back(sstart, length);
     }
     file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -46,73 +46,63 @@ int main()
         std::stringstream sstream(str);
         mapping_t ma;
         sstream >> ma.out >> ma.in >> ma.range;
-
         m.push_back(ma);
     }
     maps.push_back(m);
 
-    std::vector<std::pair<size_t, size_t>> from = seeds, to;
-    for (size_t i = 0; i < maps.size(); i++)
+    for (const auto& map : maps)
     {
-        for (size_t x = 0; x < from.size(); x++)
+        size_t size = ranges.size();
+        for (size_t i = 0; i < size; i++)
         {
             // split
-            size_t start = from[x].first,
-                   end = from[x].first + from[x].second - 1;
-            for (size_t j = 0; j < maps[i].size(); j++)
+            auto [start, length] = ranges[i];
+            size_t end = start + length - 1;
+            for (auto [in, out, range] : map)
             {
-                size_t mstart = maps[i][j].in,
-                       mend = maps[i][j].in + maps[i][j].range - 1;
-                if (start >= mstart && start <= mend && end <= mend &&
-                    end >= mstart)
+                if (start >= in && start < in + range && end < in + range &&
+                    end >= in)
                 {
                     // do nothing
                     break;
                 }
-                else if (start >= mstart && start <= mend)
+                else if (start >= in && start < in + range)
                 {
-                    from.push_back({mend + 1, end - mend}); // after end
-                    end = mend;
+                    ranges.emplace_back(
+                        in + range, end - in - range + 1); // after end
+                    end = in + range - 1;
                 }
-                else if (end <= mend && end >= mstart)
+                else if (end < in + range && end >= in)
                 {
-                    from.push_back({start, mstart - start}); // before start
-                    start = mstart;
+                    ranges.emplace_back(start, in - start); // before start
+                    start = in;
                 }
-                else if (start < mstart && end > mend)
+                else if (start < in && end >= in + range)
                 {
                     // split twice
-                    from.push_back({start, mstart - start}); // before start
-                    from.push_back({mend+1, end - mend});      // after end
-                    start = mstart;
-                    end = mend;
+                    ranges.emplace_back(start, in - start); // before start
+                    ranges.emplace_back(
+                        in + range, end - in - range + 1); // after end
+                    start = in;
+                    end = in + range - 1;
                 }
             }
-            from[x] = {start, end - start + 1};
+            ranges[i] = {start, end - start + 1};
         }
-        for (size_t x = 0; x < from.size(); x++)
+        for (auto& [start, length] : ranges)
         {
             // map
-            for (size_t j = 0; j < maps[i].size(); j++)
+            for (auto& [in, out, range] : map)
             {
-                if (from[x].first >= maps[i][j].in &&
-                    from[x].first < maps[i][j].in + maps[i][j].range)
+                if (start >= in && start < in + range)
                 {
-                    to.push_back(
-                        {from[x].first - maps[i][j].in + maps[i][j].out,
-                         from[x].second});
-                         break;
-                }
-                if (j == maps[i].size()-1)
-                {
-                    to.push_back(from[x]);
+                    start = start - in + out;
+                    break;
                 }
             }
         }
-        from = to;
-        to.clear();
     }
 
-    size_t min = std::ranges::min(from | std::views::keys);
+    size_t min = std::ranges::min(ranges | std::views::keys);
     std::cout << min;
 }
