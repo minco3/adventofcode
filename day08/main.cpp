@@ -12,23 +12,11 @@
 #include <tuple>
 #include <vector>
 #include <ranges>
+#include <numeric>
 
 using pos_t = size_t;
 
 bool done(pos_t pos) { return (pos & 0xFF) == 'Z'; }
-
-size_t gcd(size_t a, size_t b)
-{
-    while (a % b != 0)
-    {
-        size_t c = b;
-        b = a % b;
-        a = c;
-    }
-    return b;
-}
-
-size_t lcm(size_t a, size_t b) { return a * b / gcd(a, b); }
 
 pos_t to_pos(std::string str)
 {
@@ -94,5 +82,5 @@ int main()
         }
         record.second = count+1;
     }
-    std::cout << std::ranges::fold_right(positions | std::ranges::views::values, 1, lcm);
+    std::cout << std::ranges::fold_right(positions | std::ranges::views::values, 1, std::lcm<size_t, size_t>);
 }
