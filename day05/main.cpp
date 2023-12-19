@@ -5,6 +5,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <ranges>
 
 struct mapping_t
 {
@@ -112,10 +113,6 @@ int main()
         to.clear();
     }
 
-    size_t min = std::numeric_limits<size_t>::max();
-    for (auto locations : from)
-    {
-        min = std::min(min, locations.first);
-    }
+    size_t min = std::ranges::min(from | std::views::keys);
     std::cout << min;
 }
