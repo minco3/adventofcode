@@ -10,6 +10,7 @@
 #include <string_view>
 #include <tuple>
 #include <vector>
+#include <numeric>
 
 int main()
 {
@@ -64,10 +65,6 @@ int main()
         }
         i++;
     }
-    size_t sum2 = 0;
-    for (size_t n : cards)
-    {
-        sum2+=n;
-    }
+    size_t sum2 = std::accumulate(cards.begin(), cards.end(), 0);
     std::cout << sum << ' ' << sum2 << std::endl;
 }
