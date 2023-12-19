@@ -52,47 +52,52 @@ int main()
 
     for (const auto& map : maps)
     {
-        size_t size = ranges.size();
-        for (size_t i = 0; i < size; i++)
+        std::vector<std::pair<size_t, size_t>> new_ranges;
+        for (auto& range : ranges)
         {
             // split
-            auto [start, length] = ranges[i];
+            auto& [start, length] = range;
             size_t end = start + length - 1;
             for (auto [in, out, range] : map)
             {
-                if (start >= in && start < in + range && end < in + range &&
-                    end >= in)
+                if (start >= in && start + length <= in + range)
                 {
                     // do nothing
                     break;
                 }
                 else if (start >= in && start < in + range)
                 {
-                    ranges.emplace_back(
-                        in + range, end - in - range + 1); // after end
-                    end = in + range - 1;
+                    new_ranges.emplace_back(
+                        in + range,
+                        start + length - in - range); // after end
+                    length = in + range - start;
+                    break;
                 }
-                else if (end < in + range && end >= in)
+                else if (start + length <= in + range && start + length > in)
                 {
-                    ranges.emplace_back(start, in - start); // before start
+                    new_ranges.emplace_back(start, in - start); // before start
+                    length = length - in + start;
                     start = in;
+                    break;
                 }
-                else if (start < in && end >= in + range)
+                else if (start < in && start + length > in + range)
                 {
                     // split twice
-                    ranges.emplace_back(start, in - start); // before start
-                    ranges.emplace_back(
-                        in + range, end - in - range + 1); // after end
+                    new_ranges.emplace_back(start, in - start); // before start
+                    new_ranges.emplace_back(
+                        in + range,
+                        start + length - in - range); // after end
                     start = in;
-                    end = in + range - 1;
+                    length = in + range - start;
+                    break;
                 }
             }
-            ranges[i] = {start, end - start + 1};
         }
+        ranges.insert(ranges.end(), new_ranges.begin(), new_ranges.end());
         for (auto& [start, length] : ranges)
         {
             // map
-            for (auto& [in, out, range] : map)
+            for (auto [in, out, range] : map)
             {
                 if (start >= in && start < in + range)
                 {
