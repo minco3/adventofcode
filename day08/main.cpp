@@ -18,6 +18,8 @@ using pos_t = size_t;
 
 bool done(pos_t pos) { return (pos & 0xFF) == 'Z'; }
 
+size_t lcm(size_t a, size_t b) { return a * b / std::gcd(a, b); }
+
 pos_t to_pos(std::string str)
 {
     size_t pos = 0;
@@ -82,5 +84,5 @@ int main()
         }
         record.second = count+1;
     }
-    std::cout << std::ranges::fold_right(positions | std::ranges::views::values, 1, std::lcm<size_t, size_t>);
+    std::cout << std::ranges::fold_right_last(positions | std::ranges::views::values, lcm).value();
 }
