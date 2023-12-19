@@ -29,8 +29,8 @@ int main()
         sstr >> sstart >> length;
         seeds.push_back({sstart, length});
     }
-    std::getline(file, str);
-    std::getline(file, str);
+    file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
     std::vector<mapping_t> m;
     while (std::getline(file, str))
@@ -39,7 +39,7 @@ int main()
         {
             maps.push_back(m);
             m.clear();
-            file.ignore(std::numeric_limits<std::streamsize>::max());
+            file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             continue;
         }
         std::stringstream sstream(str);
