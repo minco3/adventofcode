@@ -4,6 +4,7 @@
 #include <iterator>
 #include <vector>
 #include <cassert>
+#include <functional>
 
 int main()
 {
@@ -13,21 +14,40 @@ int main()
         std::cout << "file didn't open" << std::endl;
         exit(1);
     }
-    std::vector<int32_t> mem;
+    std::vector<int64_t> mem;
     while (!file.eof())
     {
         std::string str;
         std::getline(file, str, ',');
-        mem.push_back(stoi(str));
+        mem.push_back(stoll(str));
     }
+    mem.resize(UINT16_MAX, 0);
+    int64_t relbase = 0;
     for (size_t i = 0; i < mem.size();)
     {
-        int32_t op = mem.at(i) % 100, p1 = (mem.at(i) % 1000) / 100, p2 = (mem.at(i) % 10000) / 1000, p3 = (mem.at(i) % 100000) / 10000;
+        int64_t op = mem.at(i) % 100, p1 = (mem.at(i) % 1000) / 100, p2 = (mem.at(i) % 10000) / 1000, p3 = (mem.at(i) % 100000) / 10000;
         try
         {
-            p1 = p1 ? i + 1 : mem.at(i + 1);
-            p2 = p2 ? i + 2 : mem.at(i + 2);
-            p3 = p3 ? i + 3 : mem.at(i + 3);
+            auto resolvemode = [&](uint64_t mode, int64_t i)
+            {
+                switch (mode)
+                {
+                case 0:
+                    return mem.at(i);
+                case 1:
+                    return i;
+                case 2:
+                    return relbase + mem.at(i);
+                default:
+                {
+                    std::cout << "unknown mode\n";
+                    exit(1);
+                }
+                }
+            };
+            p1 = resolvemode(p1, i+1);
+            p2 = resolvemode(p2, i+2);
+            p3 = resolvemode(p3, i+3);
         }
         catch (...)
         {
@@ -67,6 +87,10 @@ int main()
         case 8: // EQ
             mem.at(p3) = mem.at(p1) == mem.at(p2) ? 1 : 0;
             i += 4;
+            break;
+        case 9: // adjustrelbase
+            relbase += mem.at(p1);
+            i += 2;
             break;
         case 99: // EXIT
             std::cout << "exited successfully" << std::endl;
