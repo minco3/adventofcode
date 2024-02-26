@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.28)
-project(adventofcode2023)
+project(adventofcode2019)
 
 set(CMAKE_CXX_STANDARD 23)
 
