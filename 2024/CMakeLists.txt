@@ -3,8 +3,11 @@ project(adventofcode2023)
 
 set(CMAKE_CXX_STANDARD 23)
 
+link_libraries(stdc++exp)
+
 add_subdirectory(day01)
 add_subdirectory(day02)
 add_subdirectory(day03)
 add_subdirectory(day04)
 add_subdirectory(day05)
+add_subdirectory(day06)
