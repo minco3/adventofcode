@@ -5,6 +5,7 @@
 #include <functional>
 #include <vector>
 #include <iterator>
+#include <cmath>
 
 int main()
 {
@@ -35,7 +36,7 @@ int main()
                 return cur == ans;
             if (cur > ans)
                 return false;
-            return solve2(cur + vec[i], i + 1) || solve2(cur * vec[i], i + 1) || solve2(std::stoull(std::to_string(cur) + std::to_string(vec[i])), i + 1);
+            return solve2(cur + vec[i], i + 1) || solve2(cur * vec[i], i + 1) || solve2(cur * std::pow(10, std::floor(std::log10(vec[i]) + 1)) + vec[i], i + 1);
         };
         count2 += solve2(vec[0], 1) ? ans : 0;
     }
