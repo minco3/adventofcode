@@ -3,7 +3,9 @@ project(adventofcode2023)
 
 set(CMAKE_CXX_STANDARD 23)
 
-link_libraries(stdc++exp)
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+    link_libraries(stdc++exp)
+endif()
 
 add_subdirectory(day01)
 add_subdirectory(day02)
@@ -12,3 +14,4 @@ add_subdirectory(day04)
 add_subdirectory(day05)
 add_subdirectory(day06)
 add_subdirectory(day07)
+add_subdirectory(day08)
