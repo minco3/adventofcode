@@ -41,9 +41,9 @@ dfs_record dfs(point p, std::vector<std::string> &map, std::vector<std::vector<u
     dfs_record record = {1, 0, 0};
 
     auto contains_and_equal = [&](point p2) -> bool
-    { return contains(p, map[0].size(), map.size()) && map[p2.y][p2.x] == map[p.y][p.x]; };
+    { return contains(p2, map[0].size(), map.size()) && map[p2.y][p2.x] == map[p.y][p.x]; };
     auto contains_and_not_equal = [&](point p2) -> bool
-    { return contains(p, map[0].size(), map.size()) && map[p2.y][p2.x] != map[p.y][p.x]; };
+    { return contains(p2, map[0].size(), map.size()) && map[p2.y][p2.x] != map[p.y][p.x]; };
 
     std::array<point, 4> diags = {{{1, -1}, {1, 1}, {-1, 1}, {-1, -1}}}; // up-right, down-right, down-left, or up-left
     std::array<point, 4> dirs = {{{0, -1}, {0, 1}, {-1, 0}, {1, 0}}};    // up, down, left, or right
