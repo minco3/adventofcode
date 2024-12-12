@@ -1,2 +1,5 @@
 build/
 .vscode/
+input*.txt
+sample*.txt
+test*.txt
