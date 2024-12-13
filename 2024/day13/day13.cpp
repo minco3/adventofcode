@@ -19,8 +19,7 @@ struct point
 
 bool is_int(double v)
 {
-    double int_part = 0.0;
-    return std::abs(int_part - std::modf(v, &int_part)) < 0.001;
+    return std::abs(v - std::round(v)) < 0.001;
 }
 
 int main()
