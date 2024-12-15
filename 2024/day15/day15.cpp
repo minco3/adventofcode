@@ -2,25 +2,36 @@
 #include <fstream>
 #include <iostream>
 #include <print>
-#include <set>
+#include <unordered_set>
 #include <vector>
 
 struct point
 {
     int64_t x, y;
-    point operator+(point r) { return {x + r.x, y + r.y}; }
-    point operator-(point r) { return {x - r.x, y - r.y}; }
+    point operator+(point r) const { return {x + r.x, y + r.y}; }
+    point operator-(point r) const { return {x - r.x, y - r.y}; }
     friend point operator*(int64_t k, const point& p)
     {
         return {k * p.x, k * p.y};
     }
-    bool operator==(point r) { return x == r.x && y == r.y; }
+    bool operator==(point r) const { return x == r.x && y == r.y; }
     bool operator<(const point r) const { return x != r.x ? x < r.x : y < r.y; }
 };
 constexpr point left = {-1, 0};
 constexpr point right = {1, 0};
 constexpr point up = {0, -1};
 constexpr point down = {0, 1};
+
+template <>
+struct std::hash<point>
+{
+    std::size_t operator()(point const& s) const noexcept
+    {
+        std::size_t h1 = std::hash<int64_t>{}(s.x);
+        std::size_t h2 = std::hash<int64_t>{}(s.y);
+        return h1 ^ (h2 << 1);
+    }
+};
 
 bool contains(point pos, int64_t width, int64_t height)
 {
@@ -116,7 +127,7 @@ int main()
         }
         else
         {
-            std::set<point> pushable;
+            std::unordered_set<point> pushable;
             std::vector<point> boxes;
             boxes.push_back(pos + d);
             while (!boxes.empty())
