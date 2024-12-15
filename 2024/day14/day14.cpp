@@ -20,8 +20,6 @@ struct point
     bool operator<(const point r) const { return x != r.x ? x < r.x : y < r.y; }
 };
 
-bool is_int(double v) { return std::abs(v - std::round(v)) < 0.001; }
-
 int main()
 {
     auto t1 = std::chrono::high_resolution_clock::now();
