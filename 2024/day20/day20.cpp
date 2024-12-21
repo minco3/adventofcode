@@ -132,11 +132,11 @@ int main()
         {
             for (int64_t y = -max_distance; y <= max_distance; y++)
             {
-                for (int64_t x = -max_distance; x <= max_distance; x++)
+                for (int64_t x = -max_distance + std::abs(y);
+                     x <= max_distance - std::abs(y); x++)
                 {
                     auto p2 = p + point(x, y);
-                    if (distance(p, p2) > max_distance ||
-                        !contains(p2, map[0].size(), map.size()) ||
+                    if (!contains(p2, map[0].size(), map.size()) ||
                         map[p2.y][p2.x])
                     {
                         continue;
@@ -162,4 +162,3 @@ int main()
         std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::high_resolution_clock::now() - t1));
 }
-// 981616
