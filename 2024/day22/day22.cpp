@@ -15,8 +15,7 @@ int main()
     constexpr bool debug = false;
 
     auto mix = [](uint64_t lhs, uint64_t rhs) -> uint64_t { return lhs ^ rhs; };
-    auto prune = [](uint64_t n) -> uint64_t
-    { return n % 16777216; }; // assuming this gets optimized
+    auto prune = [](uint64_t n) -> uint64_t { return n & 0xFFFFFF; }; // % 16777215
     auto evolve = [mix, prune](uint64_t n) -> uint64_t
     {
         static std::unordered_map<uint64_t, uint64_t> cache;
@@ -25,9 +24,9 @@ int main()
             return cache[n];
         }
         uint64_t n2 = n;
-        n2 = prune(mix(n2, 64 * n2));
-        n2 = prune(mix(n2, n2 / 32));
-        n2 = prune(mix(n2, n2 * 2048));
+        n2 = prune(mix(n2, n2 << 6)); // * 64
+        n2 = prune(mix(n2, n2 >> 5)); // / 32
+        n2 = prune(mix(n2, n2 << 11)); // * 2048
         cache[n] = n2;
         return n2;
     };
