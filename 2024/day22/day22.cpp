@@ -18,16 +18,10 @@ int main()
     auto prune = [](uint64_t n) -> uint64_t { return n & 0xFFFFFF; }; // % 16777215
     auto evolve = [mix, prune](uint64_t n) -> uint64_t
     {
-        static std::unordered_map<uint64_t, uint64_t> cache;
-        if (cache.contains(n))
-        {
-            return cache[n];
-        }
         uint64_t n2 = n;
         n2 = prune(mix(n2, n2 << 6)); // * 64
         n2 = prune(mix(n2, n2 >> 5)); // / 32
         n2 = prune(mix(n2, n2 << 11)); // * 2048
-        cache[n] = n2;
         return n2;
     };
 
