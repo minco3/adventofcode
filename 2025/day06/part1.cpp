@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <fstream>
+#include <functional>
 #include <iostream>
 #include <map>
 #include <sstream>
@@ -28,14 +29,19 @@ int main()
         }
         else
         {
-            std::string str;
-            while (sstr >> str)
+            std::string op;
+            while (sstr >> op)
             {
-                auto sum = [](int64_t a, int64_t b) { return a + b; };
-                auto product = [](int64_t a, int64_t b) { return a * b; };
-                auto op = str == "+" ? sum : product;
-                int64_t init = str == "+" ? 0 : 1;
-                total += std::ranges::fold_left(nums[j], init, op);
+                if (op == "+")
+                {
+                    total += std::ranges::fold_left(
+                        nums[j], 0LL, std::plus<uint64_t>{});
+                }
+                else if (op == "*")
+                {
+                    total += std::ranges::fold_left(
+                        nums[j], 1LL, std::multiplies<uint64_t>{});
+                }
                 j++;
             }
         }

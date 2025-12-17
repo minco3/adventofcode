@@ -17,9 +17,7 @@ int main()
     {
         lines.push_back(line);
     }
-    auto sum = [](uint64_t a, uint64_t b) { return a + b; };
-    auto product = [](uint64_t a, uint64_t b) { return a * b; };
-    std::function<uint64_t(uint64_t, uint64_t)> op;
+    bool is_sum;
     uint64_t num;
     for (size_t i = 0; i < lines[0].length(); i++)
     {
@@ -45,17 +43,24 @@ int main()
         uint64_t number = str.empty() ? 0 : std::stoull(str);
         if (lines.back()[i] == '+')
         {
-            op = sum;
+            is_sum = true;
             num = number;
         }
         else if (lines.back()[i] == '*')
         {
-            op = product;
+            is_sum = false;
             num = number;
         }
         else
         {
-            num = op(num, number);
+            if (is_sum)
+            {
+                num += number;
+            }
+            else
+            {
+                num *= number;
+            }
         }
     }
     total += num;
