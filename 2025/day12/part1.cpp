@@ -47,7 +47,7 @@ int main()
 
         auto xPos = line.find('x');
         auto colonPos = line.find(':');
-        if (xPos !=` std::string::npos && colonPos != std::string::npos && xPos < colonPos)
+        if (xPos != std::string::npos && colonPos != std::string::npos && xPos < colonPos)
         {
             int width = std::stoi(line.substr(0, xPos));
             int height = std::stoi(line.substr(xPos + 1, colonPos - xPos - 1));
